@@ -1,36 +1,68 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.c                                           :+:      :+:    :+:   */
+/*   client_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rkassouf <rkassouf@student.42abudhabi.ae>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/19 11:34:12 by rkassouf          #+#    #+#             */
-/*   Updated: 2022/07/21 16:18:17 by rkassouf         ###   ########.fr       */
+/*   Updated: 2022/07/23 17:18:18 by rkassouf         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "minitalk_bonus.h"
+
+static int	g_received;
+
+void	bit_one(int pid)
+{
+	if (kill(pid, SIGUSR1) == -1)
+	{
+		write(1, "Error sending signal\n", 21);
+		exit(EXIT_FAILURE);
+	}
+}
+
+void	bit_zero(int pid)
+{
+	if (kill(pid, SIGUSR2) == -1)
+	{
+		write(1, "Error sending signal\n", 21);
+		exit(EXIT_FAILURE);
+	}
+}
 
 void	send_msg_binary(int pid, char *str)
 {
-	int	i;
-	int	bitshift;
+	int	shift;
 
-	i = 0;
-	while (str[i])
+	while (1)
 	{
-		bitshift = 7;
-		while (bitshift >= 0)
+		shift = 8;
+		while (--shift >= 0)
 		{
-			if (str[i] & (1 << bitshift))
-				kill(pid, SIGUSR1);
+			if (*str & (1 << shift))
+				bit_one(pid);
 			else
-				kill(pid, SIGUSR2);
-			bitshift--;
-			usleep(50);
+				bit_zero(pid);
+			while (!g_received)
+				pause();
+			g_received = 0;
 		}
-		i++;
+		if (!*str)
+			break ;
+		str++;
+	}
+}
+
+void	confirm(int signo)
+{
+	if (signo == SIGUSR1)
+		g_received = 1;
+	else if (signo == SIGUSR2)
+	{
+		write(1, "Server is busy\n", 15);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -40,9 +72,11 @@ int	main(int argc, char **argv)
 
 	if (argc != 3)
 	{
-		write(1, "Correct usage ./client serverPID msg\n", 37);
+		write(1, "Usage: ./client_bonus [serverPID] [msg]\n", 40);
 		exit(EXIT_FAILURE);
 	}
+	signal(SIGUSR1, confirm);
+	signal(SIGUSR2, confirm);
 	pid = ft_atoi(argv[1]);
 	check_inputs(pid, argv[2]);
 	send_msg_binary(pid, argv[2]);

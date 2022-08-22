@@ -6,56 +6,70 @@
 #    By: rkassouf <rkassouf@student.42abudhabi.ae>  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/19 15:28:08 by rkassouf          #+#    #+#              #
-#    Updated: 2022/07/21 21:40:38 by rkassouf         ###   ########.fr        #
+#    Updated: 2022/07/24 15:19:47 by rkassouf         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME			= minitalk
-NAME_CLIENT		= client
-NAME_SERVER		= server
-NAME_CLIENT_B	= client_bonus
-NAME_SERVER_B	= server_bonus
+CFLAGS = -Wall -Wextra -Werror
+CC = gcc $(CFLAGS)
+RM = rm -rf
 
-SRC_CLIENT		= client.c utils.c
-SRC_SERVER		= server.c utils.c
-SRC_CLIENT_B	= client_bonus.c utils_bonus.c
-SRC_SERVER_B	= server_bonus.c utils_bonus.c
+SRCS_DIR = ./src
+OBJS_DIR = ./obj
+INCLUDES_DIR = ./includes
 
-OBJ_CLIENT		= $(SRC_CLIENT:.c=.o)
-OBJ_SERVER		= $(SRC_SERVER:.c=.o)
-OBJ_CLIENT_B	= $(SRC_CLIENT_B:.c=.o)
-OBJ_SERVER_B	= $(SRC_SERVER_B:.c=.o)
+NAME = minitalk
+NAMESRV = server
+NAMECLT = client
 
-CC = gcc
+SRV_FILES = server.c utils.c
+SRV_OBJS_FILES = $(SRV_FILES:.c=.o)
+SRV_OBJS = $(addprefix $(OBJS_DIR)/, $(SRV_OBJS_FILES))
+B_SRV_FILES = server_bonus.c utils_bonus.c
+B_SRV_OBJS_FILES = $(B_SRV_FILES:.c=.o)
+B_SRV_OBJS = $(addprefix $(OBJS_DIR)/, $(B_SRV_OBJS_FILES))
 
-FLAGS =  -Wall -Werror -Wextra
+CLT_FILES = client.c utils.c
+CLT_OBJS_FILES = $(CLT_FILES:.c=.o)
+CLT_OBJS = $(addprefix $(OBJS_DIR)/, $(CLT_OBJS_FILES))
+B_CLT_FILES = client_bonus.c utils_bonus.c
+B_CLT_OBJS_FILES = $(B_CLT_FILES:.c=.o)
+B_CLT_OBJS = $(addprefix $(OBJS_DIR)/, $(B_CLT_OBJS_FILES))
 
-RM = /bin/rm -f
+INCLUDES_FILES = minitalk.h
+INCLUDES = $(addprefix $(INCLUDES_DIR)/, $(INCLUDES_FILES))
+B_INCLUDES_FILES = minitalk_bonus.h
+B_INCLUDES = $(addprefix $(INCLUDES_DIR)/, $(B_INCLUDES_FILES))
 
-all:				$(NAME)
+all: $(NAME)
 
-$(NAME):			$(NAME_CLIENT) $(NAME_SERVER)
+bonus: server_bonus client_bonus
 
-$(NAME_SERVER):		$(OBJ_SERVER)
-					$(CC) $(FLAGS) $(OBJ_SERVER) -o $(NAME_SERVER)
+$(NAME): $(NAMESRV) $(NAMECLT)
 
-$(NAME_CLIENT):		$(OBJ_CLIENT)
-					$(CC) $(FLAGS) $(OBJ_CLIENT) -o $(NAME_CLIENT)
+$(NAMESRV): $(SRV_OBJS) $(INCLUDES)
+	$(CC) -o $(NAMESRV) $(SRV_OBJS)
 
-$(NAME_SERVER_B):	$(OBJ_SERVER_B)
-					$(CC) $(FLAGS) $(OBJ_SERVER_B) -o $(NAME_SERVER_B)
+$(NAMECLT): $(CLT_OBJS) $(INCLUDES)
+	$(CC) -o $(NAMECLT) $(CLT_OBJS)
 
-$(NAME_CLIENT_B):	$(OBJ_CLIENT_B)
-					$(CC) $(FLAGS) $(OBJ_CLIENT_B) -o $(NAME_CLIENT_B)
+server_bonus: $(B_SRV_OBJS) $(B_INCLUDES)
+	$(CC) -o $(NAMESRV) $(B_SRV_OBJS)
 
-bonus: $(NAME_CLIENT_B) $(NAME_SERVER_B)
+client_bonus: $(B_CLT_OBJS) $(B_INCLUDES)
+	$(CC) -o $(NAMECLT) $(B_CLT_OBJS)
+
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c $(INCLUDES_DIR) $(INCLUDES)
+	mkdir -p $(OBJS_DIR)
+	$(CC) -I $(INCLUDES_DIR) -c $< -o $@
 
 clean:
-		$(RM) $(OBJ_CLIENT) $(OBJ_SERVER) $(OBJ_CLIENT_B) $(OBJ_SERVER_B)
+	$(RM) obj
 
 fclean: clean
-		$(RM) $(NAME_CLIENT) $(NAME_SERVER) $(NAME_CLIENT_B) $(NAME_SERVER_B)
+	$(RM) $(NAMESRV)
+	$(RM) $(NAMECLT)
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY:	all clean fclean re bonus
