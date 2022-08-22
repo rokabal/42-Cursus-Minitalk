@@ -6,7 +6,7 @@
 /*   By: rkassouf <rkassouf@student.42abudhabi.ae>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/19 11:34:12 by rkassouf          #+#    #+#             */
-/*   Updated: 2022/07/24 15:44:30 by rkassouf         ###   ########.fr       */
+/*   Updated: 2022/08/22 22:33:16 by rkassouf         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ int	main(int argc, char **argv)
 
 	if (argc != 3)
 	{
-		write(1, "Usage: ./client_bonus [serverPID] [msg]\n", 40);
+		write(1, "Usage: ./client [serverPID] [msg]\n", 40);
 		exit(EXIT_FAILURE);
 	}
 	signal(SIGUSR1, confirm);
