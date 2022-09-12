@@ -67,7 +67,7 @@ int	main(int argc, char **argv)
 
 	if (argc != 3)
 	{
-		write(1, "Usage: ./client [serverPID] [msg]\n", 40);
+		write(1, "Usage: ./client [serverPID] [msg]\n", 34);
 		exit(EXIT_FAILURE);
 	}
 	signal(SIGUSR1, confirm);
